@@ -58,11 +58,11 @@ for i in range(len(FILE_LIST_SLDPRT)):
     k = 0
     for k in range(len(ConfNames)):
         if ConfNames[k] == "기본":
-            SaveName = "ARES-OA_STATOR_COAT"
+            SaveName = BASENAME_STP[i]
         else:
             SaveName = ConfNames[k]
         print("2. Export STP from")
-        print(PATH_INPUT+'/'+SaveName)
+        print(PATH_INPUT+'/'+SaveName+'.STEP')
         Model.ShowConfiguration2(ConfNames[k])
         Result_STP = Model.SaveAs(PATH_STP+'/'+SaveName+'.STEP')
     swApp.CloseAllDocuments(True)
