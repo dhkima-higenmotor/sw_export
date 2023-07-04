@@ -13,10 +13,10 @@ FILE_LIST_SLDDRW = [file for file in FILE_LIST if (file[0:2]!="~$") and (file.en
 FILE_LIST_SLDPRT = [file for file in FILE_LIST if (not "_SKEL." in file) and (file[0:2]!="~$") and (file.endswith(".sldprt") or file.endswith(".SLDPRT")) ]
 
 # Make Directories
-PATH_2D = PATH_INPUT + "/2D"
-PATH_DXF = PATH_2D + "/DXF"
-PATH_PDF = PATH_2D + "/PDF"
-PATH_STP = PATH_2D + "/STP"
+PATH_2D = PATH_INPUT + "\\2D"
+PATH_DXF = PATH_2D + "\\DXF"
+PATH_PDF = PATH_2D + "\\PDF"
+PATH_STP = PATH_2D + "\\STP"
 if os.path.exists(PATH_2D) == False:
     os.makedirs(PATH_2D)
 if os.path.exists(PATH_DXF) == False:
@@ -42,29 +42,30 @@ time.sleep(10)
 # Export PDF, DXF
 print("1. Export PDF,DXF from")
 for i in range(len(FILE_LIST_SLDDRW)):
-    print(PATH_INPUT+'/'+FILE_LIST_SLDDRW[i])
-    Model = swApp.OpenDoc(PATH_INPUT+'/'+FILE_LIST_SLDDRW[i],3)
-    Result_PDF = Model.SaveAs(PATH_PDF+'/'+BASENAME[i]+'.pdf')
-    Result_DXF = Model.SaveAs(PATH_DXF+'/'+BASENAME[i]+'.DXF')
+    print(PATH_INPUT+'\\'+FILE_LIST_SLDDRW[i])
+    Model = swApp.OpenDoc(PATH_INPUT+'\\'+FILE_LIST_SLDDRW[i],3)
+    Result_PDF = Model.SaveAs(PATH_PDF+'\\'+BASENAME[i]+'.pdf')
+    Result_DXF = Model.SaveAs(PATH_DXF+'\\'+BASENAME[i]+'.DXF')
     swApp.CloseAllDocuments(True)
 print("----------------")
 
 # Export stp as configurations
+print("2. Export STP as configurations")
 for i in range(len(FILE_LIST_SLDPRT)):
-    Model = swApp.OpenDoc(PATH_INPUT+'/'+FILE_LIST_SLDPRT[i],1)
+    print('from : '+PATH_INPUT+'\\'+FILE_LIST_SLDPRT[i])
+    Model = swApp.OpenDoc(PATH_INPUT+'\\'+FILE_LIST_SLDPRT[i],1)
     ## Get Configurations
     ConfNames = Model.GetConfigurationNames
-    print(ConfNames)
+    print(f'Configurations : {ConfNames}')
     k = 0
     for k in range(len(ConfNames)):
         if ConfNames[k] == "기본":
             SaveName = BASENAME_STP[i]
         else:
             SaveName = ConfNames[k]
-        print("2. Export STP from")
-        print(PATH_INPUT+'/'+SaveName+'.STEP')
+        print('to : '+PATH_INPUT+'\\'+SaveName+'.STEP')
         Model.ShowConfiguration2(ConfNames[k])
-        Result_STP = Model.SaveAs(PATH_STP+'/'+SaveName+'.STEP')
+        Result_STP = Model.SaveAs(PATH_STP+'\\'+SaveName+'.STEP')
     swApp.CloseAllDocuments(True)
 print("----------------")
 
