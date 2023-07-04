@@ -49,12 +49,22 @@ for i in range(len(FILE_LIST_SLDDRW)):
     swApp.CloseAllDocuments(True)
 print("----------------")
 
-# Export stp
-print("2. Export STP from")
+# Export stp as configurations
 for i in range(len(FILE_LIST_SLDPRT)):
-    print(PATH_INPUT+'/'+FILE_LIST_SLDPRT[i])
     Model = swApp.OpenDoc(PATH_INPUT+'/'+FILE_LIST_SLDPRT[i],1)
-    Result_STP = Model.SaveAs(PATH_STP+'/'+BASENAME_STP[i]+'.STEP')
+    ## Get Configurations
+    ConfNames = Model.GetConfigurationNames
+    print(ConfNames)
+    k = 0
+    for k in range(len(ConfNames)):
+        if ConfNames[k] == "기본":
+            SaveName = "ARES-OA_STATOR_COAT"
+        else:
+            SaveName = ConfNames[k]
+        print("2. Export STP from")
+        print(PATH_INPUT+'/'+SaveName)
+        Model.ShowConfiguration2(ConfNames[k])
+        Result_STP = Model.SaveAs(PATH_STP+'/'+SaveName+'.STEP')
     swApp.CloseAllDocuments(True)
 print("----------------")
 
