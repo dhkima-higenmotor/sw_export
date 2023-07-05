@@ -89,7 +89,7 @@ for i in range(len(FILE_LIST_SLDASM)):
     k = 0
     for k in range(len(ConfNames)):
         if ConfNames[k] == "기본":
-            SaveName = BASENAME_STP[i]
+            SaveName = FILE_LIST_SLDASM[i]
         else:
             SaveName = ConfNames[k]
         print('  to : '+PATH_INPUT+'\\'+SaveName+'.STEP')
