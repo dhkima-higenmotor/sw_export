@@ -68,11 +68,11 @@ for i in range(len(FILE_LIST_SLDPRT)):
     #print(f' Configurations : {ConfNames}')
     k = 0
     for k in range(len(ConfNames)):
-        if ConfNames[k] == "기본":
+        if (ConfNames[k]=="기본") or (ConfNames[k]=="Default"):
             SaveName = BASENAME_STP[i]
         else:
             SaveName = ConfNames[k]
-        print('  to : '+PATH_INPUT+'\\'+SaveName+'.STEP')
+        print('  to : '+PATH_STP+'\\'+SaveName+'.STEP')
         Model.ShowConfiguration2(ConfNames[k])
         Result_STP = Model.SaveAs(PATH_STP+'\\'+SaveName+'.STEP')
     swApp.CloseAllDocuments(True)
@@ -88,11 +88,11 @@ for i in range(len(FILE_LIST_SLDASM)):
     #print(f' Configurations : {ConfNames}')
     k = 0
     for k in range(len(ConfNames)):
-        if ConfNames[k] == "기본":
+        if (ConfNames[k]=="기본") or (ConfNames[k]=="Default"):
             SaveName = BASENAME_STP_ASM[i]
         else:
             SaveName = ConfNames[k]
-        print('  to : '+PATH_INPUT+'\\'+SaveName+'.STEP')
+        print('  to : '+PATH_STP_ASM+'\\'+SaveName+'.STEP')
         Model.ShowConfiguration2(ConfNames[k])
         Result_STP = Model.SaveAs(PATH_STP_ASM+'\\'+SaveName+'.STEP')
     swApp.CloseAllDocuments(True)
