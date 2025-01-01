@@ -2,10 +2,10 @@ import os
 import sys
 import win32com.client
 import time
-import PySimpleGUI as sg
+from customtkinter import filedialog
 
 # Working Directory
-PATH_INPUT = sg.popup_get_folder("Select working directory")
+PATH_INPUT = filedialog.askdirectory()
 if PATH_INPUT is None:
     sys.exit()
 FILE_LIST = os.listdir(PATH_INPUT)
