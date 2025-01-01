@@ -2,11 +2,12 @@ import os
 import sys
 import win32com.client
 import time
-from customtkinter import filedialog
+from tkinter import filedialog
 
 # Working Directory
-PATH_INPUT = filedialog.askdirectory()
-if PATH_INPUT is None:
+PATH_INPUT = filedialog.askdirectory(title="Select Solidworks Working Directory", initialdir="D:\\github")
+print(PATH_INPUT)
+if PATH_INPUT == '':
     sys.exit()
 FILE_LIST = os.listdir(PATH_INPUT)
 FILE_LIST_SLDDRW = [file for file in FILE_LIST if (file[0:2]!="~$") and (file.endswith(".slddrw") or file.endswith(".SLDDRW")) ]
