@@ -1,6 +1,10 @@
 @echo off
 
-call %userprofile%\scoop\apps\miniconda3\current\Scripts\activate.bat
+REM path
+set root=%USERPROFILE%\miniforge3
+call %root%\Scripts\activate.bat %root%
+call conda activate base
+
 REM call conda activate open-webui
 call python packing_partlist.py
 
