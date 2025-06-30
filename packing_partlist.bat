@@ -1,11 +1,13 @@
 @echo off
 
 REM path
-set root=%USERPROFILE%\miniforge3
-call %root%\Scripts\activate.bat %root%
-call conda activate base
+REM set root=%USERPROFILE%\miniforge3
+REM call %root%\Scripts\activate.bat %root%
+REM call conda activate base
 
 REM call conda activate open-webui
-call python packing_partlist.py
+REM call python packing_partlist.py
+
+call uv run packing_partlist.py
 
 REM pause
