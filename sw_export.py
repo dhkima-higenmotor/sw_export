@@ -2,11 +2,11 @@ import os
 import sys
 import win32com.client
 import time
-import customtkinter
-from customtkinter import filedialog
+import tkinter
+from tkinter import filedialog, font, ttk
 
 # Parameters
-WorkingDirectory = "D:\\github"
+WorkingDirectory = "D:\github"
 Step = "STEP_ON"
 Step_Asm = "STEP_ASM_ON"
 Dxf = "DXF_ON"
@@ -17,17 +17,17 @@ Out_Dir = "2D"
 ##############################
 # Functions
 def init_parameters():
-    entry_wd.insert(0,"D:\\github")
+    entry_wd.insert(0,"D:\github")
     entry_prefix.insert(0,"*")
     entry_out_dir.insert(0,"2D")
 
 def read_parameters():
     global WorkingDirectory, Prefix, Out_Dir, Step, Step_Asm, Dxf, Pdf
     WorkingDirectory = entry_wd.get()
-    Step = switch_STEP.get()
-    Step_Asm = switch_STEP_ASM.get()
-    Dxf = switch_DXF.get()
-    Pdf = switch_PDF.get()
+    Step = switch_STEP_var.get()
+    Step_Asm = switch_STEP_ASM_var.get()
+    Dxf = switch_DXF_var.get()
+    Pdf = switch_PDF_var.get()
     Prefix = entry_prefix.get()
     Out_Dir = entry_out_dir.get()
     if Out_Dir=="":
@@ -163,7 +163,7 @@ def button_wd_callback():
     print("# button_wd pressed.")
     global WorkingDirectory
     WorkingDirectory = filedialog.askdirectory(title="Select Solidworks Working Directory", initialdir=WorkingDirectory)
-    entry_wd.delete(0,last_index='end')
+    entry_wd.delete(0,'end')
     entry_wd.insert(0,WorkingDirectory)
     print('Working Directory : %s'%WorkingDirectory)
 
@@ -190,14 +190,12 @@ def button_exit_callback():
 
 ##############################
 # GUI config
-customtkinter.set_default_color_theme("green")
-app = customtkinter.CTk()
+app = tkinter.Tk()
 app.title("sw_export")
-#app.geometry("950x650")
 app.resizable(width=False, height=False)
-font_big = customtkinter.CTkFont(size=14)
+font_big = font.Font(size=14)
 if ( sys.platform.startswith('win')): app.iconbitmap('icons\\sw_export.ico')
-# Gap between pads in customtkinter
+# Gap between pads in tkinter
 PADX = 5
 PADY = 1
 GRIDWIDTH = 150
@@ -205,59 +203,63 @@ GRIDWIDTH = 150
 ##############################
 # GUI items
 # Working Directory
-label_wd = customtkinter.CTkLabel(app, text="DIR = ", fg_color="transparent", compound="right")
+label_wd = ttk.Label(app, text="DIR = ")
 label_wd.grid(row=0, column=0, padx=PADX, pady=PADY, sticky="e")
 
-entry_wd = customtkinter.CTkEntry(app, placeholder_text="D:\\github", width=GRIDWIDTH*2)
+entry_wd = ttk.Entry(app, width=40)
 entry_wd.grid(row=0, column=1, padx=PADX, pady=PADY, columnspan=2)
 
-button_wd = customtkinter.CTkButton(app, text="BROWSE", command=button_wd_callback, width=GRIDWIDTH/2)
+button_wd = ttk.Button(app, text="BROWSE", command=button_wd_callback, width=10)
 button_wd.grid(row=0, column=3, padx=PADX, pady=PADY, sticky="w")
 
 # Subject 1
-label_subject1 = customtkinter.CTkLabel(app, text="# OPTIONS", fg_color="transparent", compound="right", font=font_big)
+label_subject1 = ttk.Label(app, text="# OPTIONS")
 label_subject1.grid(row=1, column=0, padx=PADX, pady=PADY, sticky="w")
 
 # Switch for STEP
-switch_STEP_var = customtkinter.StringVar(value="STEP_ON")
-switch_STEP = customtkinter.CTkSwitch(app, text="STEP", command=switch_STEP, variable=switch_STEP_var, onvalue="STEP_ON", offvalue="STEP_OFF")
+switch_STEP_var = tkinter.StringVar(value="STEP_ON")
+switch_STEP = ttk.Checkbutton(app, text="STEP", command=switch_STEP, variable=switch_STEP_var, onvalue="STEP_ON", offvalue="STEP_OFF")
 switch_STEP.grid(row=2, column=0, padx=PADX, pady=PADY, sticky="w")
+switch_STEP.invoke() # Set default to ON
 
 # Switch for STEP_ASM
-switch_STEP_ASM_var = customtkinter.StringVar(value="STEP_ASM_ON")
-switch_STEP_ASM = customtkinter.CTkSwitch(app, text="STEP_ASM", command=switch_STEP_ASM, variable=switch_STEP_ASM_var, onvalue="STEP_ASM_ON", offvalue="STEP_ASM_OFF")
+switch_STEP_ASM_var = tkinter.StringVar(value="STEP_ASM_ON")
+switch_STEP_ASM = ttk.Checkbutton(app, text="STEP_ASM", command=switch_STEP_ASM, variable=switch_STEP_ASM_var, onvalue="STEP_ASM_ON", offvalue="STEP_ASM_OFF")
 switch_STEP_ASM.grid(row=3, column=0, padx=PADX, pady=PADY, sticky="w")
+switch_STEP_ASM.invoke()
 
 # Switch for DXF
-switch_DXF_var = customtkinter.StringVar(value="DXF_ON")
-switch_DXF = customtkinter.CTkSwitch(app, text="DXF", command=switch_DXF, variable=switch_DXF_var, onvalue="DXF_ON", offvalue="DXF_OFF")
+switch_DXF_var = tkinter.StringVar(value="DXF_ON")
+switch_DXF = ttk.Checkbutton(app, text="DXF", command=switch_DXF, variable=switch_DXF_var, onvalue="DXF_ON", offvalue="DXF_OFF")
 switch_DXF.grid(row=4, column=0, padx=PADX, pady=PADY, sticky="w")
+switch_DXF.invoke()
 
 # Switch for PDF
-switch_PDF_var = customtkinter.StringVar(value="PDF_ON")
-switch_PDF = customtkinter.CTkSwitch(app, text="PDF", command=switch_PDF, variable=switch_PDF_var, onvalue="PDF_ON", offvalue="PDF_OFF")
+switch_PDF_var = tkinter.StringVar(value="PDF_ON")
+switch_PDF = ttk.Checkbutton(app, text="PDF", command=switch_PDF, variable=switch_PDF_var, onvalue="PDF_ON", offvalue="PDF_OFF")
 switch_PDF.grid(row=5, column=0, padx=PADX, pady=PADY, sticky="w")
+switch_PDF.invoke()
 
 # PREFIX
-entry_prefix = customtkinter.CTkEntry(app, placeholder_text="*", width=GRIDWIDTH*2)
+entry_prefix = ttk.Entry(app, width=40)
 entry_prefix.grid(row=2, column=1, padx=PADX, pady=PADY, sticky="e", columnspan=2)
 
-label_prefix = customtkinter.CTkLabel(app, text="PREFIX", fg_color="transparent", compound="left")
+label_prefix = ttk.Label(app, text="PREFIX")
 label_prefix.grid(row=2, column=3, padx=PADX, pady=PADY, sticky="w")
 
 # OUT_DIR
-entry_out_dir = customtkinter.CTkEntry(app, placeholder_text="2D", width=GRIDWIDTH*2)
+entry_out_dir = ttk.Entry(app, width=40)
 entry_out_dir.grid(row=3, column=1, padx=PADX, pady=PADY, sticky="e", columnspan=2)
 
-label_out_dir = customtkinter.CTkLabel(app, text="OUT_DIR", fg_color="transparent", compound="left")
+label_out_dir = ttk.Label(app, text="OUT_DIR")
 label_out_dir.grid(row=3, column=3, padx=PADX, pady=PADY, sticky="w")
 
 # Run Button
-button_run = customtkinter.CTkButton(app, text="RUN", command=button_run_callback, width=GRIDWIDTH*2)
+button_run = ttk.Button(app, text="RUN", command=button_run_callback, width=30)
 button_run.grid(row=5, column=1, padx=PADX, pady=PADY, sticky="w", columnspan=2)
 
 # Exit Button
-button_exit = customtkinter.CTkButton(app, text="EXIT", command=button_exit_callback, width=GRIDWIDTH/2)
+button_exit = ttk.Button(app, text="EXIT", command=button_exit_callback, width=10)
 button_exit.grid(row=5, column=3, padx=PADX, pady=PADY, sticky="w")
 
 
