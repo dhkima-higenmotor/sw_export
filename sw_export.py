@@ -6,19 +6,19 @@ import tkinter
 from tkinter import filedialog, font, ttk
 
 # Parameters
-WorkingDirectory = "D:\github"
+WorkingDirectory = f"D:\github"
 Step = "STEP_ON"
 Step_Asm = "STEP_ASM_ON"
 Dxf = "DXF_ON"
 Pdf = "PDF_ON"
-Prefix = "*"
+Prefix = ""
 Out_Dir = "2D"
 
 ##############################
 # Functions
 def init_parameters():
-    entry_wd.insert(0,"D:\github")
-    entry_prefix.insert(0,"*")
+    entry_wd.insert(0,f"D:\github")
+    entry_prefix.insert(0,"")
     entry_out_dir.insert(0,"2D")
 
 def read_parameters():
