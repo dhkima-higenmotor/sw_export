@@ -1,0 +1,17 @@
+[Version]
+SW990001
+
+[Layers]
+0 = 7, 1
+GEOMETRY = -2, 1
+DIM = 3, 6
+NOTE = 3, 6
+CENTER = 1, 7
+TABLE = 3, 6
+TEMPLATE = 3, 6
+HATCH = -2, 8
+
+[Entities]
+
+[Colors]
+

@@ -8,4 +8,4 @@ REM call python sw_export.py
 
 call uv run sw_export.py
 
-pause
+REM pause

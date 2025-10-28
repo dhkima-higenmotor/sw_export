@@ -6,7 +6,7 @@ import tkinter
 from tkinter import filedialog, font, ttk
 
 # Parameters
-WorkingDirectory = f"D:\github"
+WorkingDirectory = r"D:\github"
 Step = "STEP_ON"
 Step_Asm = "STEP_ASM_ON"
 Dxf = "DXF_ON"
@@ -17,7 +17,7 @@ Out_Dir = "2D"
 ##############################
 # Functions
 def init_parameters():
-    entry_wd.insert(0,f"D:\github")
+    entry_wd.insert(0,r"D:\github")
     entry_prefix.insert(0,"")
     entry_out_dir.insert(0,"2D")
 
@@ -43,7 +43,7 @@ def read_parameters():
     print("-------------------")
 
 def run_export():
-    global WorkingDirectory, Prefix, Out_Dir, Step, Step_Asm, Dxf, Pdf
+    global DXF_MAP_FILE, WorkingDirectory, Prefix, Out_Dir, Step, Step_Asm, Dxf, Pdf
     global Result_PDF, Result_DXF, Result_STP, Result_STP_ASM
     #
     # Working Directory
@@ -155,7 +155,7 @@ def run_export():
         print("----------------")
     #
     # Quit Solidworks
-    swApp.ExitApp()
+    #swApp.ExitApp()
     print("..... Finished!")
 
 # Callback Functions
