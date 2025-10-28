@@ -101,9 +101,11 @@ def run_export():
                 time.sleep(5)
                 if Pdf=="PDF_ON":
                     Result_PDF = Model.SaveAs(PATH_PDF+'\\'+BASENAME[i]+'.pdf')
+                    time.sleep(1)
                     print('  to : '+PATH_INPUT+'\\'+BASENAME[i]+'.pdf')
                 if Dxf=="DXF_ON":
                     Result_DXF = Model.SaveAs(PATH_DXF+'\\'+BASENAME[i]+'.DXF')
+                    time.sleep(5)
                     print('  to : '+PATH_INPUT+'\\'+BASENAME[i]+'.DXF')
                 swApp.CloseAllDocuments(True)
         print("----------------")
@@ -128,6 +130,7 @@ def run_export():
                     print('  to : '+PATH_STP+'\\'+SaveName+'.STEP')
                     Model.ShowConfiguration2(ConfNames[k])
                     Result_STP = Model.SaveAs(PATH_STP+'\\'+SaveName+'.STEP')
+                    time.sleep(1)
                 swApp.CloseAllDocuments(True)
         print("----------------")
     #
