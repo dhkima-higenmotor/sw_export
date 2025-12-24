@@ -1,9 +1,13 @@
 import os
 import sys
 import win32com.client
+import pythoncom
 import time
 import tkinter
 from tkinter import filedialog, font, ttk
+
+# SolidWorks Constants
+swUserPreferenceToggle_e_swDxfIssuingWarning = 11 # Toggle to issue warning if DXF scale is not 1:1
 
 # Parameters
 WorkingDirectory = r"D:\github"
@@ -94,67 +98,170 @@ def run_export():
     if Dxf=="DXF_ON" or Pdf=="PDF_ON":
         print("# Export PDF, DXF")
         for i in range(len(FILE_LIST_SLDDRW)):
-            if (Prefix!="" or Prefix!="*") and FILE_LIST_SLDDRW[i].startswith(Prefix):
-                print('from : '+PATH_INPUT+'\\'+FILE_LIST_SLDDRW[i])
-                time.sleep(1)
-                Model = swApp.OpenDoc(PATH_INPUT+'\\'+FILE_LIST_SLDDRW[i],3)
-                time.sleep(5)
-                if Pdf=="PDF_ON":
-                    Result_PDF = Model.SaveAs(PATH_PDF+'\\'+BASENAME[i]+'.pdf')
+            try:
+                if (Prefix!="" or Prefix!="*") and FILE_LIST_SLDDRW[i].startswith(Prefix):
+                    print('from : '+PATH_INPUT+'\\'+FILE_LIST_SLDDRW[i])
                     time.sleep(1)
-                    print('  to : '+PATH_INPUT+'\\'+BASENAME[i]+'.pdf')
-                if Dxf=="DXF_ON":
-                    Result_DXF = Model.SaveAs(PATH_DXF+'\\'+BASENAME[i]+'.DXF')
+                    # OpenDoc6(FileName, Type, Options, Configuration, Errors, Warnings)
+                    # Type: 3 (swDocDRAWING)
+                    # Options: 1 (Silent) | 32 (LoadModel - Force Resolved)
+                    # This ensures drawing is not Lightweight, which causes DXF export failure
+                    # Must use VT_BYREF | VT_I4 for output arguments in late-bound calls
+                    error = win32com.client.VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0)
+                    warning = win32com.client.VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0)
+                    Model = swApp.OpenDoc6(PATH_INPUT+'\\'+FILE_LIST_SLDDRW[i], 3, 1 | 32, "", error, warning)
+                    
+                    if Model is None:
+                         print(f"  FAILED to open: {FILE_LIST_SLDDRW[i]} (Error: {error.value})")
+                         continue
+
+                    # Explicitly Activate the document to ensure context for SaveAs
+                    # ActivateDoc3 also takes an Error byref
+                    swApp.ActivateDoc3(FILE_LIST_SLDDRW[i], False, 0, error)
+
                     time.sleep(5)
-                    print('  to : '+PATH_INPUT+'\\'+BASENAME[i]+'.DXF')
-                swApp.CloseAllDocuments(True)
+                    
+                    # Check for needed References if any (optional)
+                    
+                    # Use SaveAs3 for better compatibility and silent option
+                    if Pdf=="PDF_ON":
+                        target_pdf = PATH_PDF+'\\'+BASENAME[i]+'.pdf'
+                        # SaveAs3 Silent fails to overwrite sometimes, so delete first
+                        if os.path.exists(target_pdf):
+                            try:
+                                os.remove(target_pdf)
+                            except:
+                                pass
+                        
+                        # SaveAs3(Name, Version, Options)
+                        # Version: 0 (Current), Options: 1 (Silent)
+                        Result_PDF = Model.SaveAs3(target_pdf, 0, 1)
+                        time.sleep(1)
+                        # SaveAs3 returns 0 on success
+                        if Result_PDF == 0:
+                            print('  to : '+target_pdf)
+                        else:
+                            print(f'  FAILED to export PDF: {BASENAME[i]} (Error Code: {Result_PDF})')
+
+                    if Dxf=="DXF_ON":
+                        target_dxf = PATH_DXF+'\\'+BASENAME[i]+'.DXF'
+                        if os.path.exists(target_dxf):
+                            try:
+                                os.remove(target_dxf)
+                            except:
+                                pass
+
+                        # Disable DXF Scale Warning
+                        # 11 = swDxfIssuingWarning
+                        # Disable DXF Scale Warning (11) and Mapping File (143)
+                        # 11 = swDxfIssuingWarning, 143 = swDxfMappingFileEnabled
+                        swApp.SetUserPreferenceToggle(11, False)
+                        swApp.SetUserPreferenceToggle(143, False)
+                        
+                        # Use SaveAs3 in Non-Silent Mode (Options=0)
+                        # This avoids the "Error 1" caused by Silent Mode in some versions
+                        # The preference toggle above handles the specific popup we care about
+                        Result_DXF = Model.SaveAs3(target_dxf, 0, 0)
+                        
+                        time.sleep(5)
+                        
+                        # Restore Warning (Optional)
+                        # swApp.SetUserPreferenceToggle(11, True) 
+                        # swApp.SetUserPreferenceToggle(143, True) 
+
+                        if Result_DXF == 0:
+                            print('  to : '+target_dxf)
+                        else:
+                            print(f'  FAILED to export DXF: {BASENAME[i]} (Error Code: {Result_DXF})')
+
+                    swApp.CloseAllDocuments(True)
+            except Exception as e:
+                print(f"  ERROR processing {FILE_LIST_SLDDRW[i]}: {str(e)}")
+                try:
+                    swApp.CloseAllDocuments(True)
+                except:
+                    pass
+        
+        # Restore Preferences globally at end
+        swApp.SetUserPreferenceToggle(11, True)
+        swApp.SetUserPreferenceToggle(143, True)
         print("----------------")
     #
     # Export stp as configurations from .SLDPRT
     if Step=="STEP_ON":
         print("# Export STP as configurations from .SLDPRT")
         for i in range(len(FILE_LIST_SLDPRT)):
-            if (Prefix!="" or Prefix!="*") and FILE_LIST_SLDPRT[i].startswith(Prefix):
-                print('from : '+PATH_INPUT+'\\'+FILE_LIST_SLDPRT[i])
-                time.sleep(1)
-                Model = swApp.OpenDoc(PATH_INPUT+'\\'+FILE_LIST_SLDPRT[i],1)
-                ## Get Configurations
-                ConfNames = Model.GetConfigurationNames
-                #print(f' Configurations : {ConfNames}')
-                k = 0
-                for k in range(len(ConfNames)):
-                    if (ConfNames[k]=="기본") or (ConfNames[k]=="Default"):
-                        SaveName = BASENAME_STP[i]
-                    else:
-                        SaveName = ConfNames[k]
-                    print('  to : '+PATH_STP+'\\'+SaveName+'.STEP')
-                    Model.ShowConfiguration2(ConfNames[k])
-                    Result_STP = Model.SaveAs(PATH_STP+'\\'+SaveName+'.STEP')
+            try:
+                if (Prefix!="" or Prefix!="*") and FILE_LIST_SLDPRT[i].startswith(Prefix):
+                    print('from : '+PATH_INPUT+'\\'+FILE_LIST_SLDPRT[i])
                     time.sleep(1)
-                swApp.CloseAllDocuments(True)
+                    Model = swApp.OpenDoc(PATH_INPUT+'\\'+FILE_LIST_SLDPRT[i],1)
+                    ## Get Configurations
+                    ConfNames = Model.GetConfigurationNames
+                    #print(f' Configurations : {ConfNames}')
+                    k = 0
+                    if ConfNames is not None:
+                        for k in range(len(ConfNames)):
+                            try:
+                                if (ConfNames[k]=="기본") or (ConfNames[k]=="Default"):
+                                    SaveName = BASENAME_STP[i]
+                                else:
+                                    SaveName = ConfNames[k]
+                                print('  to : '+PATH_STP+'\\'+SaveName+'.STEP')
+                                Model.ShowConfiguration2(ConfNames[k])
+                                # Use SaveAs3 with Silent option (1)
+                                Result_STP = Model.SaveAs3(PATH_STP+'\\'+SaveName+'.STEP', 0, 1)
+                                time.sleep(1)
+                                if Result_STP != 0:
+                                     print(f"  FAILED to export STEP: {SaveName} (Error Code: {Result_STP})")
+                            except Exception as conf_e:
+                                print(f"  ERROR processing config {ConfNames[k]} in {FILE_LIST_SLDPRT[i]}: {str(conf_e)}")
+
+                    swApp.CloseAllDocuments(True)
+            except Exception as e:
+                print(f"  ERROR processing {FILE_LIST_SLDPRT[i]}: {str(e)}")
+                try:
+                    swApp.CloseAllDocuments(True)
+                except:
+                    pass
         print("----------------")
     #
     # Export stp as configurations from .SLDASM
     if Step_Asm=="STEP_ASM_ON":
         print("# Export STP as configurations from .SLDASM")
         for i in range(len(FILE_LIST_SLDASM)):
-            if (Prefix!="" or Prefix!="*") and FILE_LIST_SLDASM[i].startswith(Prefix):
-                print('from : '+PATH_INPUT+'\\'+FILE_LIST_SLDASM[i])
-                time.sleep(1)
-                Model = swApp.OpenDoc(PATH_INPUT+'\\'+FILE_LIST_SLDASM[i],2)
-                ## Get Configurations
-                ConfNames = Model.GetConfigurationNames
-                #print(f' Configurations : {ConfNames}')
-                k = 0
-                for k in range(len(ConfNames)):
-                    if (ConfNames[k]=="기본") or (ConfNames[k]=="Default"):
-                        SaveName = BASENAME_STP_ASM[i]
-                    else:
-                        SaveName = ConfNames[k]
-                    print('  to : '+PATH_STP_ASM+'\\'+SaveName+'.STEP')
-                    Model.ShowConfiguration2(ConfNames[k])
-                    Result_STP_ASM = Model.SaveAs(PATH_STP_ASM+'\\'+SaveName+'.STEP')
-                swApp.CloseAllDocuments(True)
+            try:
+                if (Prefix!="" or Prefix!="*") and FILE_LIST_SLDASM[i].startswith(Prefix):
+                    print('from : '+PATH_INPUT+'\\'+FILE_LIST_SLDASM[i])
+                    time.sleep(1)
+                    Model = swApp.OpenDoc(PATH_INPUT+'\\'+FILE_LIST_SLDASM[i],2)
+                    ## Get Configurations
+                    ConfNames = Model.GetConfigurationNames
+                    #print(f' Configurations : {ConfNames}')
+                    k = 0
+                    if ConfNames is not None:
+                        for k in range(len(ConfNames)):
+                            try:
+                                if (ConfNames[k]=="기본") or (ConfNames[k]=="Default"):
+                                    SaveName = BASENAME_STP_ASM[i]
+                                else:
+                                    SaveName = ConfNames[k]
+                                print('  to : '+PATH_STP_ASM+'\\'+SaveName+'.STEP')
+                                print('  to : '+PATH_STP_ASM+'\\'+SaveName+'.STEP')
+                                Model.ShowConfiguration2(ConfNames[k])
+                                # Use SaveAs3 with Silent option (1)
+                                Result_STP_ASM = Model.SaveAs3(PATH_STP_ASM+'\\'+SaveName+'.STEP', 0, 1)
+                                if Result_STP_ASM != 0:
+                                     print(f"  FAILED to export STEP ASM: {SaveName} (Error Code: {Result_STP_ASM})")
+                            except Exception as conf_e:
+                                print(f"  ERROR processing config {ConfNames[k]} in {FILE_LIST_SLDASM[i]}: {str(conf_e)}")
+                    swApp.CloseAllDocuments(True)
+            except Exception as e:
+                print(f"  ERROR processing {FILE_LIST_SLDASM[i]}: {str(e)}")
+                try:
+                    swApp.CloseAllDocuments(True)
+                except:
+                    pass
         print("----------------")
     #
     # Quit Solidworks
